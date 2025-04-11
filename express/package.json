@@ -4,21 +4,26 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon --watch . --ext ts --ignore '*.test.ts' --delay 3 --exec ts-node server/server.ts",
+    "dev": "nodemon --watch . --ext ts --ignore '*.test.ts' --delay 3 --exec ts-node www.ts",
     "dev2": "tsup --watch --onSuccess \"node dist/index.cjs\"",
     "build": "tsup"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
-    "debug": "~2.6.9",
-    "express": "~4.16.1",
-    "http-errors": "~1.6.3",
+    "debug": "^4.4.0",
+    "express": "~5.1.0",
+    "http-errors": "^2.0.0",
     "jade": "~1.11.0",
-    "morgan": "~1.9.1"
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.9",
+    "pg-promise": "^11.13.0"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
+    "@types/morgan": "^1.9.9",
     "@types/node": "^22.14.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
