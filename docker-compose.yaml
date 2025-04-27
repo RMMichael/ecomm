@@ -1,0 +1,40 @@
+# DEVELOPMENT: merges with docker-compose.override.yaml
+#   - mainly for hot reloading and dev host ports
+# PRODUCTION: don't merge: `docker-compose -f docker-compose.yaml up --build -d`
+# env variables are loaded from file: .env
+#   REQUIRED: NODE_ENV=development|production, POSTGRES_PASSWORD
+#   optional: (for dev host port conflicts) FRONTEND_PORT, BACKEND_PORT, DB_PORT, NGINX_PORT
+
+# TODO maybe [ "bash", "-c", "if [ "$NODE_ENV" = "development" ]; then ; else ; fi" ]
+version: "3.8"
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:54321"
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+      #      - ./db/data:/var/lib/postgresql/data
+      # https://github.com/docker-library/docs/blob/master/postgres/README.md#initialization-scripts
+      - ./express/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+  api:
+    build: ./express
+    ports:
+      - "3000:3000"
+    environment:
+      DB_URL: "postgresql://postgres:${POSTGRES_PASSWORD:?required}@db:54321/postgres?sslmode=disable"
+      NODE_ENV: ${NODE_ENV:-production}
+      BACKEND_PORT: ${BACKEND_PORT}
+    depends_on:
+      - db
+    volumes:
+      - ./express:/app
+      - /app/node_modules
+      # keep node_modules within container
+      # https://docs.docker.com/compose/compose-file/compose-file-v3/#volumes-for-services-swarms-and-stack-files
+      # https://docs.docker.com/storage/volumes/#populate-a-volume-using-a-container
