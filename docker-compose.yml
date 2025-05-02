@@ -1,12 +1,11 @@
 # DEVELOPMENT: merges with docker-compose.override.yaml
 #   - mainly for hot reloading and dev host ports
-# PRODUCTION: don't merge: `docker-compose -f docker-compose.yaml up --build -d`
+# PRODUCTION: don't merge: `docker-compose -f docker-compose.yml up --build -d`
 # env variables are loaded from file: .env
 #   REQUIRED: NODE_ENV=development|production, POSTGRES_PASSWORD
 #   optional: (for dev host port conflicts) FRONTEND_PORT, BACKEND_PORT, DB_PORT, NGINX_PORT
 
 # TODO maybe [ "bash", "-c", "if [ "$NODE_ENV" = "development" ]; then ; else ; fi" ]
-version: "3.8"
 services:
   db:
     image: postgres:16
@@ -16,7 +15,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
       POSTGRES_DB: mydb
     ports:
-      - "5432:54321"
+      - "54321:5432"
     volumes:
       - ./db_data:/var/lib/postgresql/data
       #      - ./db/data:/var/lib/postgresql/data
