@@ -6,3 +6,4 @@
 /docker-compose.override.yaml
 /db_data/
 */out/*
+.vercel/

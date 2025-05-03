@@ -2,7 +2,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import {useEffect, useState} from "react";
-import { UserSchema, User } from "shared";
+import { UserSchema, User } from "../../schemas/DataObjects";
 import { z } from "zod";
 
 export default function Home() {

@@ -1,7 +1,7 @@
 import {query, pool} from '../pg/queries';
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
-
+import { User, Session} from "../schemas/DataObjects";
 
 export function generateSessionToken(): string {
     const bytes = new Uint8Array(20);
@@ -35,14 +35,8 @@ export async function validateSessionToken(token: string): Promise<SessionValida
     if (row === null) {
         return { session: null, user: null };
     }
-    const session: Session = {
-        id: row[0],
-        userId: row[1],
-        expiresAt: row[2]
-    };
-    const user: User = {
-        id: row[3]
-    };
+    const session :Session = { id : row[0], userId : row[1], expiresAt : row[2]}
+    const user :User = row[3];
     if (Date.now() >= session.expiresAt.getTime()) {
         await pool.query("DELETE FROM user_session WHERE id = $1", [session.id]);
         return { session: null, user: null };
@@ -69,15 +63,15 @@ export type SessionValidationResult =
     | { session: Session; user: User }
     | { session: null; user: null };
 
-export interface Session {
-    id: string;
-    userId: number;
-    expiresAt: Date;
-}
-
-export interface User {
-    id: number;
-}
+// export interface Session {
+//     id: string;
+//     userId: number;
+//     expiresAt: Date;
+// }
+//
+// export interface User {
+//     id: number;
+// }
 
 
 
