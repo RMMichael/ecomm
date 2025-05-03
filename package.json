@@ -4,5 +4,8 @@
   },
   "scripts": {
     "vercel-build": "next build"
+  },
+  "dependencies": {
+    "zod": "^3.24.3"
   }
 }

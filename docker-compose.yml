@@ -25,6 +25,7 @@ services:
     build: ./express
     ports:
       - "3000:3000"
+      - "80:80"
     environment:
       DB_URL: "postgresql://postgres:${POSTGRES_PASSWORD:?required}@db:54321/postgres?sslmode=disable"
       NODE_ENV: ${NODE_ENV:-production}

@@ -2,9 +2,11 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import {useEffect, useState} from "react";
+import { UserSchema, User } from "shared";
+import { z } from "zod";
 
 export default function Home() {
-  const [r, setR] = useState("");
+  const [r, setR] = useState<User[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -14,8 +16,14 @@ export default function Home() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const json = await response.json();
-        setR(json.msg);
+        const users = z.array(UserSchema).parse(json);
+        setR(users);
       } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          console.error("Validation Errors:", error.errors);
+        } else {
+          console.error("Unknown Error:", error);
+        }
         setR(error.message)
       }
     };
@@ -33,8 +41,12 @@ export default function Home() {
           priority
         />
         <ol>
+          { r.map((u) => (
+              <li key={u.id}>
+                {u.name} - {u.age}
+              </li>
+          ))}
           <li>
-            {r}
             Get started by editing <code>src/app/page.tsx</code>.
           </li>
           <li>Save and see your changes instantly.</li>

@@ -5,3 +5,4 @@
 /.idea
 /docker-compose.override.yaml
 /db_data/
+*/out/*

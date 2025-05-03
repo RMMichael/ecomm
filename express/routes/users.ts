@@ -1,10 +1,11 @@
 var express = require('express');
 var router = express.Router();
-import { getUsers } from "../pg/queries";
+import { query } from "../pg/queries";
 
 /* GET users listing. */
-router.get('/', function(req: any, res: any, next: any) {
-  res.send(getUsers(req, res));
+router.get('/', async function(req: any, res: any, next: any) {
+  const result = await query("SELECT * FROM t", [])
+  res.send(result.rows);
 });
 
 module.exports = router;
