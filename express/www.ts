@@ -1,29 +1,24 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
+import * as fs from "node:fs";
+import * as https from "node:https";
 
 var app = require('./app');
 var debug = require('debug')('express:server');
 var http = require('http');
 
-/**
- * Get port from environment and store in Express.
- */
+const options = {
+  key: fs.readFileSync(process.env.MKCERTKEY || ''),
+  cert: fs.readFileSync(process.env.MKFILE || ''),
+};
 
-var port = normalizePort(process.env.PORT || '3000');
+console.log(`https: ${process.env.HTTPSDEV}`);
+
+const port = normalizePort(process.env.HTTPSDEV ? 443 : 80);
+console.log(`port: ${port}`)
+
 app.set('port', port);
-
-/**
- * Create HTTP server.
- */
-
-var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
+const server =  (process.env.HTTPSDEV == 'true') ? https.createServer(options, app) : http.createServer(app);
 
 server.listen(port);
 server.on('error', onError);

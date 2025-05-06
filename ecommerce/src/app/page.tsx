@@ -7,6 +7,7 @@ import { z } from "zod";
 
 export default function Home() {
   const [r, setR] = useState<User[]>([]);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,7 +25,7 @@ export default function Home() {
         } else {
           console.error("Unknown Error:", error);
         }
-        setR(error.message)
+        setErrorMsg(error.message);
       }
     };
     fetchData();
@@ -46,6 +47,7 @@ export default function Home() {
                 {u.name} - {u.age}
               </li>
           ))}
+          { errorMsg && <li>{errorMsg}</li> }
           <li>
             Get started by editing <code>src/app/page.tsx</code>.
           </li>
