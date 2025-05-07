@@ -7,18 +7,14 @@ var app = require('./app');
 var debug = require('debug')('express:server');
 var http = require('http');
 
-const options = {
-  key: fs.readFileSync(process.env.MKCERTKEY || ''),
-  cert: fs.readFileSync(process.env.MKFILE || ''),
-};
+const options = {};
 
 console.log(`https: ${process.env.HTTPSDEV}`);
-
-const port = normalizePort(process.env.HTTPSDEV ? 443 : 80);
+const port = normalizePort(process.env.HTTPSDEV === 'true' ? 443 : 80);
 console.log(`port: ${port}`)
 
 app.set('port', port);
-const server =  (process.env.HTTPSDEV == 'true') ? https.createServer(options, app) : http.createServer(app);
+const server =  (process.env.HTTPSDEV === 'true') ? https.createServer(options, app) : http.createServer(app);
 
 server.listen(port);
 server.on('error', onError);

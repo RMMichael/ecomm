@@ -1,4 +1,3 @@
-"use client"
 import Image from "next/image";
 import styles from "./page.module.css";
 import {useEffect, useState} from "react";
@@ -12,7 +11,7 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:80/users");
+        const response = await fetch("http://localhost/users");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

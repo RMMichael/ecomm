@@ -30,15 +30,29 @@ export class Auth {
 
     static async validateSessionToken(token: string): Promise<SessionValidationResult> {
         const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-        const row = await pool.query(
-            "SELECT user_session.id, user_session.user_id, user_session.expires_at, users.id FROM user_session INNER JOIN users ON users.id = user_session.user_id WHERE id = $1",
+        const result = await pool.query(
+            `SELECT s.id as session_id, s.user_id, s.expires_at, u.name, u.age
+            FROM user_session as s INNER JOIN users as u ON s.user_id = u.id
+            WHERE s.id = $1`,
             [sessionId]
-        ).then(r => r.rows[0]);
-        if (row === null) {
+        );
+        if (result.rows.length === 0) {
+            console.error(`no session found for token: ${token}`);
             return {session: null, user: null};
         }
-        const session: Session = {id: row[0], userId: row[1], expiresAt: row[2]}
-        const user: User = row[3];
+        const row = result.rows[0];
+        console.log("row: ", JSON.stringify(row));
+
+        const session: Session = {
+            id: row["session_id"],
+            userId: row["user_id"],
+            expiresAt: row["expires_at"],
+        };
+        const user: User = {
+            id: row["user_id"],
+            name: row["name"],
+            age: row["age"],
+        }
         if (Date.now() >= session.expiresAt.getTime()) {
             await pool.query("DELETE FROM user_session WHERE id = $1", [session.id]);
             return {session: null, user: null};

@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "ts-node ./www.ts",
-    "dev": "nodemon --watch . --ext ts --ignore '*.test.ts' --delay 3 --exec ts-node www.ts",
+    "start": "ts-node ./server.ts",
+    "dev": "nodemon --watch . --ext ts --ignore '*.test.ts' --delay 3 --exec ts-node server.ts",
     "dev2": "tsup --watch --onSuccess \"node dist/index.cjs\"",
     "build": "tsup"
   },

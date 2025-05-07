@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 import { query, pool } from "../pg/queries";
 import { Auth } from "../middleware/Auth";
-import { UserSchema, User } from "../schemas/DataObjects";
+import { User } from "../schemas/DataObjects";
 
 const dbQueryUsername = async (username: string): Promise<User | null> => {
     const result = await query("SELECT * FROM users WHERE name = $1", [username]);
@@ -10,7 +10,7 @@ const dbQueryUsername = async (username: string): Promise<User | null> => {
         console.error(`no user found: ${username}`);
         return null;
     }
-    const parseUser = UserSchema.safeParse(result.rows[0]);
+    const parseUser = User.safeParse(result.rows[0]);
     if (!parseUser.success) {
         console.error(parseUser.error);
         return null;
@@ -47,9 +47,11 @@ router.get('/', async function(req: any, res: any, next: any) {
         sameSite: 'none',
         expires: session.expiresAt,
         path: '/',
-        secure: true
+        secure: true,
     });
     res.json(existingUser);
+
+    next();
 });
 
 export default router;

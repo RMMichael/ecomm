@@ -32,15 +32,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
       NODE_ENV: ${NODE_ENV:-production}
       BACKEND_PORT: ${BACKEND_PORT}
-      MKCERTKEY: ${MKCERTKEY}
-      MKFILE: ${MKFILE}
       HTTPSDEV: ${HTTPSDEV}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN}
     depends_on:
       - db
     volumes:
       - ./express:/app
-      - ./localhost.pem:/app/localhost.pem
-      - ./localhost-key.pem:/app/localhost-key.pem
       - /app/node_modules
       # keep node_modules within container
       # https://docs.docker.com/compose/compose-file/compose-file-v3/#volumes-for-services-swarms-and-stack-files
