@@ -1,4 +1,4 @@
-import {Auth} from "./middleware/Auth";
+import {Auth} from "./lib/Auth";
 
 var createError = require('http-errors');
 import express, { Application, Request, Response } from "express";
@@ -25,12 +25,14 @@ import indexRouter from './routes/index';
 import usersRouter from './routes/users';
 import loginRouter from './routes/login';
 import {CustomRequest} from "./schemas/DataObjects";
+import {sessionMiddleware} from "./middleware/session";
+import {allowedOrigins} from "./lib/Auth";
 
 const app: Application = express();
 
-console.log(`frontend origin: ${process.env.FRONTEND_ORIGIN}`);
+console.log(`allowed origin: ${allowedOrigins}`);
 app.use(cors({
-  origin: [process.env.FRONTEND_ORIGIN],
+  origin: allowedOrigins,
   credentials: true,  // Allow cookies
 }));
 
@@ -43,35 +45,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use(async (req, res, next) => {
-  if (req.method !== "GET") {
-    const origin: any = req.headers["Origin"];
-    // You can also compare it against the Host or X-Forwarded-Host header.
-    if (origin === null || !/.*['localhost']*.com/.test(origin)) {
-      res.status(403);
-      return;
-    }
-
-    if (!/.*['localhost/login']*.com/.test(origin)) {
-      // create session on successful login
-      // get cookies from request
-      const token = req.cookies["session"] ?? null;
-      if (token !== null) {
-        const {session, user} = await Auth.validateSessionToken(token);
-        console.log(`current user: ${JSON.stringify(user)}`);
-        req.data = {
-          session,
-          user,
-        };
-      }
-    }
-  }
-  next();
-});
+app.use(sessionMiddleware);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/login', loginRouter);
+app.use('/api/v1/login', loginRouter);
 
 app.use((req, res, next) => {
   console.log(`after routes`);

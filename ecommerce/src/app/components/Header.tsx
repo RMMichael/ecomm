@@ -1,6 +1,8 @@
 import Link from "next/link";
 import {useState} from "react";
 
+const fetchUser = () => fetch("http://localhost/api/v1/users/me").then((res) => res.json());
+
 export default function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 

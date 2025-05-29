@@ -3,6 +3,8 @@ import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/enco
 import { sha256 } from "@oslojs/crypto/sha2";
 import { User, Session} from "../schemas/DataObjects";
 
+export const allowedOrigins = [process.env.FRONTEND_ORIGIN];
+
 export class Auth {
 
     static generateSessionToken(): string {

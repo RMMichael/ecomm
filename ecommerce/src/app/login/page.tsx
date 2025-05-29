@@ -18,8 +18,13 @@ const LoginPage = () => {
         const { username, password } = formData;
 
         try {
-            const response = await fetch(`http://localhost:80/login?username=${username}`, {
+            const response = await fetch(`http://localhost/api/v1/login`, {
                 credentials: "include",
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: username, password: password }),
             });
 
             if (!response.ok) {

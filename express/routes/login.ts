@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 import { query, pool } from "../pg/queries";
-import { Auth } from "../middleware/Auth";
+import { Auth } from "../lib/Auth";
 import { User } from "../schemas/DataObjects";
 
 const dbQueryUsername = async (username: string): Promise<User | null> => {
@@ -21,9 +21,11 @@ const dbQueryUsername = async (username: string): Promise<User | null> => {
 
 // adapting from https://lucia-auth.com/tutorials/google-oauth/nextjs#validate-callback
 // app/login/google/callback/route.ts
-router.get('/', async function(req: any, res: any, next: any) {
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const username = url.searchParams.get("username") ?? "";
+router.post('/', async function(req: any, res: any, next: any) {
+    // const url = new URL(req.url, `http://${req.headers.host}`);
+    // const username = url.searchParams.get("username") ?? "";
+    console.log("login post request body:", JSON.stringify(req.body));
+    const { username } = req.body;
 
     console.log(`retrieving user: ${username}`);
     const existingUser = await dbQueryUsername(username);
@@ -50,6 +52,8 @@ router.get('/', async function(req: any, res: any, next: any) {
         secure: true,
     });
     res.json(existingUser);
+
+    console.log(`session set:`, sessionToken);
 
     next();
 });

@@ -1,11 +1,22 @@
-const express = require('express');
+import express from "express";
+
 const router = express.Router();
 import { query } from "../pg/queries";
-import { Auth } from "../middleware/Auth";
+import { Auth } from "../lib/Auth";
 
+/* old stuff
+if (token !== null) {
+        const {session, user} = await Auth.validateSessionToken(token);
+        console.log(`current user: ${JSON.stringify(user)}`);
+        req.data = {
+          session,
+          user,
+        };
+      }
+ */
 
 /* GET users listing. */
-router.get('/', async function(req: any, res: any, next: any) {
+router.get('/me', async function(req: any, res: any, next: any) {
   let result;
   try {
     result = await query("SELECT * FROM users", []);
