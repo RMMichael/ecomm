@@ -1,6 +1,6 @@
-import express from "express";
+import { Request, Response, NextFunction, Router} from "express";
 
-const router = express.Router();
+const router = Router();
 import { query } from "../pg/queries";
 import { Auth } from "../lib/Auth";
 
@@ -16,17 +16,15 @@ if (token !== null) {
  */
 
 /* GET users listing. */
-router.get('/me', async function(req: any, res: any, next: any) {
-  let result;
-  try {
-    result = await query("SELECT * FROM users", []);
-    // console.log(result);
-  } catch (e) {
-    console.error(e);
-  }
-
-  console.log(`result rows: `, result?.rows);
-  res.send(result?.rows ?? []);
+router.get('/me', async function(req: Request, res: Response, next: NextFunction) {
+  // user is already attached to request by the session middleware
+  console.log("api hit /me", req.session, req.user);
+  res.json({
+    status: "success",
+    data: {
+      user: req.user,
+    }
+  });
 });
 
 export default router;

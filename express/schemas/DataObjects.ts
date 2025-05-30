@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-
-
 // Define the Zod schema for a user
 export const User = z.object({
     id: z.number(),
+    googleId: z.string(),
+    email: z.string(),
     name: z.string(),
-    age: z.number().optional(),
+    picture: z.string(),
 });
 
 export const Session = z.object({

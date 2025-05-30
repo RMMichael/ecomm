@@ -10,13 +10,19 @@ const dbQueryUsername = async (username: string): Promise<User | null> => {
         console.error(`no user found: ${username}`);
         return null;
     }
-    const parseUser = User.safeParse(result.rows[0]);
-    if (!parseUser.success) {
-        console.error(parseUser.error);
-        return null;
-    }
+    // TODO: update when schema is updated
+    // const parseUser = User.safeParse(result.rows[0]);
+    // if (!parseUser.success) {
+    //     console.error(parseUser.error);
+    //     return null;
+    // }
+    // return parseUser.data;
 
-    return parseUser.data;
+    const parseUser = User.strip().partial().parse(result.rows[0]);
+    const defaults: User = {
+        id: 0, googleId: "", email: "", name: "", picture: ""
+    }
+    return Object.assign({} as User, defaults, parseUser);
 }
 
 // adapting from https://lucia-auth.com/tutorials/google-oauth/nextjs#validate-callback

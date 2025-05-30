@@ -6,14 +6,14 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
+import { Session, User } from './schemas/DataObjects';
 
 // https://www.npmjs.com/package/ts-node#missing-types
 // Extend the Express Request type
-declare global {
-  namespace Express {
-    interface Request {
-      data?: Record<string, any>; // "data" property with a general object type
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    session?: Session;
+    user?: User;
   }
 }
 
@@ -37,7 +37,7 @@ app.use(cors({
 }));
 
 app.get('/routes/users', function (req, res, next) {
-  res.json({msg: 'This is CORS-enabled for users!'})
+  res.json({msg: 'This is CORS-enabled for users!'});
 })
 
 app.use(logger('dev'));
@@ -48,7 +48,7 @@ app.use(cookieParser());
 app.use(sessionMiddleware);
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/login', loginRouter);
 
 app.use((req, res, next) => {

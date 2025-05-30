@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import styles from "./page.module.css";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { UserSchema, User } from "../../schemas/DataObjects";
 import { z } from "zod";
 
@@ -42,12 +42,12 @@ export default function Home() {
           priority
         />
         <ol>
-          { r.map((u) => (
-              <li key={u.id}>
-                {u.name} - {u.age}
-              </li>
+          {r.map((u) => (
+            <li key={u.id}>
+              {u.name} - {u.age}
+            </li>
           ))}
-          { errorMsg && <li>{errorMsg}</li> }
+          {errorMsg && <li>{errorMsg}</li>}
           <li>
             Get started by editing <code>src/app/page.tsx</code>.
           </li>

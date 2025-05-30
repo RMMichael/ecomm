@@ -53,7 +53,9 @@ export class Auth {
         const user: User = {
             id: row["user_id"],
             name: row["name"],
-            age: row["age"],
+            email: row["email"],
+            googleId: "",
+            picture: "",
         }
         if (Date.now() >= session.expiresAt.getTime()) {
             await pool.query("DELETE FROM user_session WHERE id = $1", [session.id]);
