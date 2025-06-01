@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { queryClient } from "@/app/components/UserContext";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -33,25 +34,7 @@ const LoginPage = () => {
       const jsonData = await response.json();
       setResult("Login: " + JSON.stringify(jsonData));
       setErrorMessage("");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      setErrorMessage("Error: " + message);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      // Send a logout request to the backend
-      const response = await fetch("http://127.0.0.1:80/logout");
-
-      if (response.ok) {
-        const jsonData = await response.json();
-        setResult("Logout: " + JSON.stringify(jsonData));
-        setErrorMessage("");
-      } else {
-        const errorData = await response.json();
-        setErrorMessage(errorData.message);
-      }
+      queryClient.invalidateQueries({ queryKey: ["user"], exact: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setErrorMessage("Error: " + message);
@@ -87,9 +70,6 @@ const LoginPage = () => {
         {errorMessage && <p style={styles.error}>{errorMessage}</p>}
         <button type="submit" style={styles.button}>
           Login
-        </button>
-        <button type="button" style={styles.button} onClick={handleLogout}>
-          Logout
         </button>
         <p>Response: {result}</p>
       </form>

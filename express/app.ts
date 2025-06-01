@@ -1,7 +1,7 @@
 import {Auth} from "./lib/Auth";
 
 var createError = require('http-errors');
-import express, { Application, Request, Response } from "express";
+import express, {Application, NextFunction, Request, Response} from "express";
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -24,6 +24,7 @@ dotenv.config();
 import indexRouter from './routes/index';
 import usersRouter from './routes/users';
 import loginRouter from './routes/login';
+import logoutRouter from './routes/logout';
 import {CustomRequest} from "./schemas/DataObjects";
 import {sessionMiddleware} from "./middleware/session";
 import {allowedOrigins} from "./lib/Auth";
@@ -50,16 +51,20 @@ app.use(sessionMiddleware);
 app.use('/', indexRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/login', loginRouter);
-
-app.use((req, res, next) => {
-  console.log(`after routes`);
-  // next();
-});
+app.use('/api/v1/logout', logoutRouter);
 
 // disable automatic browser request for this path
 app.get('/favicon.ico', (req: Request, res: Response): void => { res.status(204).end(); });
 
 // catch 404 and forward to error handler
+app.use('/api/v1/{*splat}', async (req: Request, res: Response, next: NextFunction) => {
+  const path = (req.params.splat as unknown as String[]).join('/');
+  res.status(200).json({
+    status: 'error',
+    message: `The requested resource ${req.method} /${path} was not found.`,
+  });
+});
+
 app.use(function(req: any, res: any, next: any) {
   next(createError(404));
 });
