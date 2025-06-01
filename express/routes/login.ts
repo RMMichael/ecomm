@@ -1,4 +1,4 @@
-const express = require('express');
+import express, { Request, Response, NextFunction} from 'express';
 const router = express.Router();
 import { query, pool } from "../pg/queries";
 import { Auth } from "../lib/Auth";
@@ -27,9 +27,14 @@ const dbQueryUsername = async (username: string): Promise<User | null> => {
 
 // adapting from https://lucia-auth.com/tutorials/google-oauth/nextjs#validate-callback
 // app/login/google/callback/route.ts
-router.post('/', async function(req: any, res: any, next: any) {
-    // const url = new URL(req.url, `http://${req.headers.host}`);
-    // const username = url.searchParams.get("username") ?? "";
+router.post('/', async function(req: Request, res: Response, next: NextFunction) {
+    if (req.user) {
+        res.json({
+            status: "error",
+            message: "User already logged in",
+        });
+        return;
+    }
     console.log("login post request body:", JSON.stringify(req.body));
     const { username } = req.body;
 
@@ -49,7 +54,6 @@ router.post('/', async function(req: any, res: any, next: any) {
 
     const sessionToken = Auth.generateSessionToken();
     const session = await Auth.createSession(sessionToken, existingUser.id);
-    // await Auth.setSessionTokenCookie(res, sessionToken, session.expiresAt);
     res.cookie('session', sessionToken, {
         httpOnly: true,
         sameSite: 'none',

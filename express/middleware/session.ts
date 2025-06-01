@@ -4,7 +4,7 @@ import { allowedOrigins, Auth } from "../lib/Auth";
 export async function sessionMiddleware(req: Request, res: Response, next: NextFunction) {
     const token = req.cookies["session"] ?? null;
     if (token !== null) {
-        console.log("retrieving session", token);
+        console.log("retrieving session token", token);
         const result = await Auth.validateSessionToken(token);
         console.log("session result:", JSON.stringify(result));
 

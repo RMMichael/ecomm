@@ -71,14 +71,21 @@ export class Auth {
         return {session, user};
     }
 
-    static async invalidateSession(sessionId: string): Promise<void> {
-        await pool.query("DELETE FROM user_session WHERE id = $1", [sessionId]);
+    static async invalidateSession(sessionId: string): Promise<boolean> {
+        const result = await pool.query("DELETE FROM user_session WHERE id = $1", [sessionId]);
+        console.log("invalidateSession result", result);
+        return (result.rowCount !== null) && (result.rowCount > 0);
+
     }
 
     static async invalidateAllSessions(userId: number): Promise<void> {
         await pool.query("DELETE FROM user_session WHERE user_id = $1", [userId]);
     }
 
+    static async getUserSessions(userId: number): Promise<User[]> {
+        const result = await pool.query("SELECT FROM user_session WHERE user_id = $1", [userId]);
+        return result.rows;
+    }
 
 }
 type SessionValidationResult =

@@ -27,6 +27,7 @@ import loginRouter from './routes/login';
 import logoutRouter from './routes/logout';
 import {CustomRequest} from "./schemas/DataObjects";
 import {sessionMiddleware} from "./middleware/session";
+import {errorHandler} from "./middleware/errorHandler";
 import {allowedOrigins} from "./lib/Auth";
 
 const app: Application = express();
@@ -84,5 +85,7 @@ app.use(function(err: any, req: any, res: any, next: any) {
   };
   res.status(err.status || 500).json(errorJson);
 });
+
+app.use(errorHandler);
 
 module.exports = app;

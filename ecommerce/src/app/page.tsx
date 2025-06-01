@@ -9,27 +9,6 @@ export default function Home() {
   const [r, setR] = useState<User[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://localhost/users");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const json = await response.json();
-        const users = z.array(UserSchema).parse(json);
-        setR(users);
-      } catch (error: any) {
-        if (error instanceof z.ZodError) {
-          console.error("Validation Errors:", error.errors);
-        } else {
-          console.error("Unknown Error:", error);
-        }
-        setErrorMsg(error.message);
-      }
-    };
-    fetchData();
-  }, []);
   return (
     <div className={styles.page}>
       <main className={styles.main}>

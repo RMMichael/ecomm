@@ -7,7 +7,7 @@ import { Auth } from "../lib/Auth";
 import { User } from "../schemas/DataObjects";
 
 router.post('/', async function(req: Request, res: Response, next: NextFunction) {
-  if (!req.user) {
+  if (!req.session) {
     res.json({
       status: "error",
       code: 404,
@@ -18,7 +18,13 @@ router.post('/', async function(req: Request, res: Response, next: NextFunction)
 
   console.log("api hit /logout", req.session, req.user);
 
-  // remove session from db?
+  const success = await Auth.invalidateSession(req.session.id);
+  if (!success) {
+    console.error(`Could not delete session ${req.session.id} from database`);
+    res.status(500);
+    return;
+  }
+
   res.cookie('session', '', {
     httpOnly: true,
     sameSite: 'none',
@@ -27,6 +33,7 @@ router.post('/', async function(req: Request, res: Response, next: NextFunction)
     secure: true,
   });
 
+  // 205 - don't cache result ?
   res.json({
     status: "success",
   });
