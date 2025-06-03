@@ -31,8 +31,9 @@ const useCurrentUserQuery = () => {
   });
 };
 
-const CurrentUserContext =
-  React.createContext<UseQueryResult<User | null>>(null);
+const CurrentUserContext = React.createContext<UseQueryResult<User> | null>(
+  null,
+);
 
 export const useCurrentUserContext = () => {
   const currentUser = React.useContext(CurrentUserContext);

@@ -32,12 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col bg-gray-50 text-gray-900 antialiased`}
       >
         <QueryClientProvider client={queryClient}>
           <CurrentUserContextProvider>
             <Header />
-            <main className="flex grow flex-col">{children}</main>
+            <main className="flex grow flex-col px-4">{children}</main>
           </CurrentUserContextProvider>
         </QueryClientProvider>
       </body>

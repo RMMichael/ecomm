@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const columns = [
   { key: "name", label: "Name" },
@@ -41,19 +42,19 @@ const data = [
   {
     name: "Kristin 2 Watson",
     title: "Lead Implementation Liaison",
-    email: "kristin.watson@example.com",
+    email: "kristin2.watson@example.com",
     role: "Admin",
   },
   {
     name: "Kristin 3 Watson",
     title: "Lead Implementation Liaison",
-    email: "kristin.watson@example.com",
+    email: "kristin3.watson@example.com",
     role: "Admin",
   },
   {
     name: "Kristin 4 Watson",
     title: "Lead Implementation Liaison",
-    email: "kristin.watson@example.com",
+    email: "kristin4.watson@example.com",
     role: "Admin",
   },
 ];
@@ -84,13 +85,65 @@ function SortIcon({ direction }: any) {
   );
 }
 
+const fetchData = async () => {
+  return data;
+};
+const useData = () => {
+  return useQuery({
+    queryKey: ["data"],
+    queryFn: fetchData,
+  });
+};
+const deleteData = async (idx: number) => {
+  console.log("deleting data idx", idx);
+  // "fetch request to delete returns response from server"
+  return new Promise((resolve) => {
+    data.splice(idx, 1); // server modifies the data
+    const responseFromServer = {
+      status: "success",
+      data: {
+        id: idx,
+      },
+    };
+    resolve(responseFromServer);
+  });
+};
+const useMutateData = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteData,
+    onSuccess: (responseData: any) => {
+      console.log("mutation success", responseData);
+      const idxToRemove = responseData.data.id;
+      queryClient.setQueryData(["data"], (oldData: any[]) => {
+        const newData = [
+          ...oldData.slice(0, idxToRemove),
+          ...oldData.slice(idxToRemove + 1),
+        ];
+        console.log("idx", idxToRemove, "old", [...oldData], "new", [
+          ...newData,
+        ]);
+        return newData;
+      });
+    },
+  });
+};
+
 type MyComponentProps = {
   name: string;
 };
-
 export default function StripedTable() {
+  const { isPending, isError, data, error } = useData();
+  const mutation = useMutateData();
   const [sortKey, setSortKey] = useState(null);
   const [direction, setDirection] = useState("asc");
+
+  if (isPending) {
+    return <div>Loading...</div>;
+  }
+  if (isError) {
+    return <div>Error: {error.message}</div>;
+  }
 
   function handleSort(key: any) {
     if (sortKey === key) {
@@ -155,7 +208,7 @@ export default function StripedTable() {
                   {sortedData.map((person: any, idx: any) => (
                     <tr
                       key={person.email}
-                      className={idx % 2 === 0 ? undefined : "bg-gray-50"}
+                      className={idx % 2 === 0 ? "bg-gray-100" : "bg-gray-50"}
                     >
                       {columns.map((col) => (
                         <td
@@ -173,8 +226,12 @@ export default function StripedTable() {
                         <a
                           href="#"
                           className="text-indigo-600 hover:text-indigo-900"
+                          onClick={() => {
+                            console.log("mutate idx", idx);
+                            mutation.mutate(idx);
+                          }}
                         >
-                          Edit<span className="sr-only">, {person.name}</span>
+                          Delete<span className="sr-only">, {person.name}</span>
                         </a>
                       </td>
                     </tr>
