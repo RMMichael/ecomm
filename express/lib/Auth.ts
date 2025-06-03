@@ -33,7 +33,7 @@ export class Auth {
     static async validateSessionToken(token: string): Promise<SessionValidationResult> {
         const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
         const result = await pool.query(
-            `SELECT s.id as session_id, s.user_id, s.expires_at, u.name, u.age
+            `SELECT s.id as session_id, s.user_id, s.expires_at, u.name
             FROM user_session as s INNER JOIN users as u ON s.user_id = u.id
             WHERE s.id = $1`,
             [sessionId]

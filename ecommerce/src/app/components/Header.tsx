@@ -1,16 +1,10 @@
 import Link from "next/link";
-import { useState } from "react";
-import {
-  useQuery,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
 
 import { useContext } from "react";
-import { CurrentUserContext } from "@/app/components/UserContext";
+import { useCurrentUserContext } from "@/app/components/UserContext";
 
 export default function Header() {
-  const result = useContext(CurrentUserContext);
+  const result = useCurrentUserContext();
   const { isSuccess, data: user } = result ?? {};
 
   const isLoggedIn = isSuccess && user?.name;
