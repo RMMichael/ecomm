@@ -87,6 +87,10 @@ export class Auth {
         return result.rows;
     }
 
+    static async getAllSessions() {
+        const result = await pool.query("SELECT * FROM user_session");
+        return result.rows;
+    }
 }
 type SessionValidationResult =
 | { session: Session; user: User }

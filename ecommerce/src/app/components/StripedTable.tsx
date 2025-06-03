@@ -1,11 +1,17 @@
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+// const columns = [
+//   { key: "name", label: "Name" },
+//   { key: "title", label: "Title" },
+//   { key: "email", label: "Email" },
+//   { key: "role", label: "Role" },
+// ];
+
 const columns = [
-  { key: "name", label: "Name" },
-  { key: "title", label: "Title" },
-  { key: "email", label: "Email" },
-  { key: "role", label: "Role" },
+  { key: "id", label: "ID" },
+  { key: "user_id", label: "User ID" },
+  { key: "expires_at", label: "Expires At" },
 ];
 
 const data = [
@@ -86,11 +92,16 @@ function SortIcon({ direction }: any) {
 }
 
 const fetchData = async () => {
-  return data;
+  const response = await fetch("http://localhost/api/v1/sessions");
+  const json = await response.json();
+  if (json.status === "error") {
+    throw new Error(json.message);
+  }
+  return json.data;
 };
 const useData = () => {
   return useQuery({
-    queryKey: ["data"],
+    queryKey: ["sessions"],
     queryFn: fetchData,
   });
 };

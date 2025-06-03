@@ -11,16 +11,7 @@ export const pool = new Pool({
 export const query = (text :any, params :any) => {
     return pool.query(text, params)
 }
-//
-// const getUsers = (request :any, response :any) => {
-//     pool.query('SELECT * FROM t', (error: any, results: { rows: any }) => {
-//         if (error) {
-//             throw error
-//         }
-//         response.status(200).json(results.rows)
-//     })
-// }
-//
+
 // async function testDbConnection() {
 //     try {
 //         // Try to connect and query
