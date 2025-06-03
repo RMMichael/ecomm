@@ -68,4 +68,4 @@ router.post('/', async function(req: Request, res: Response, next: NextFunction)
     next();
 });
 
-export default router;
+export { router as loginRouter };

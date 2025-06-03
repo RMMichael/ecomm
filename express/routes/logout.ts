@@ -1,11 +1,7 @@
-import {NextFunction, Request, Response} from "express";
-
-const express = require('express');
-const router = express.Router();
-import { query, pool } from "../pg/queries";
+import {Router, NextFunction, Request, Response} from "express";
 import { Auth } from "../lib/Auth";
-import { User } from "../schemas/DataObjects";
 
+const router = Router();
 router.post('/', async function(req: Request, res: Response, next: NextFunction) {
   if (!req.session) {
     res.json({
@@ -39,4 +35,4 @@ router.post('/', async function(req: Request, res: Response, next: NextFunction)
   });
 });
 
-export default router;
+export { router as logoutRouter };

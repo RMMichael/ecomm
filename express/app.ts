@@ -21,10 +21,8 @@ declare module 'express-serve-static-core' {
 import dotenv from 'dotenv';
 dotenv.config();
 
-import indexRouter from './routes/index';
-import usersRouter from './routes/users';
-import loginRouter from './routes/login';
-import logoutRouter from './routes/logout';
+import {indexRouter} from './routes/index';
+import {apiV1Router} from "./routes/api.v1.routes";
 import {CustomRequest} from "./schemas/DataObjects";
 import {sessionMiddleware} from "./middleware/session";
 import {errorHandler} from "./middleware/errorHandler";
@@ -38,9 +36,7 @@ app.use(cors({
   credentials: true,  // Allow cookies
 }));
 
-app.get('/routes/users', function (req, res, next) {
-  res.json({msg: 'This is CORS-enabled for users!'});
-})
+
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -49,25 +45,23 @@ app.use(cookieParser());
 
 app.use(sessionMiddleware);
 
-app.use('/', indexRouter);
-app.use('/api/v1/users', usersRouter);
-app.use('/api/v1/login', loginRouter);
-app.use('/api/v1/logout', logoutRouter);
-
 // disable automatic browser request for this path
 app.get('/favicon.ico', (req: Request, res: Response): void => { res.status(204).end(); });
+app.use('/', indexRouter);
 
-// catch 404 and forward to error handler
-app.use('/api/v1/{*splat}', async (req: Request, res: Response, next: NextFunction) => {
-  const path = (req.params.splat as unknown as String[]).join('/');
+app.use('/api/v1', apiV1Router);
+
+// catch api 404s
+app.use('/api/v1/{*splat}', async (req: Request, res: Response) => {
   res.status(200).json({
     status: 'error',
-    message: `The requested resource ${req.method} /${path} was not found.`,
+    message: `The requested resource ${req.method} ${req.originalUrl} was not found.`,
   });
 });
 
-app.use(function(req: any, res: any, next: any) {
-  next(createError(404));
+// catch general 404s
+app.use('*splat', (req, res) => {
+  res.status(404).send('Page not found');
 });
 
 // error handler
@@ -88,4 +82,4 @@ app.use(function(err: any, req: any, res: any, next: any) {
 
 app.use(errorHandler);
 
-module.exports = app;
+export default app;

@@ -31,4 +31,4 @@ router.get('/me', async function(req: Request, res: Response, next: NextFunction
   return;
 });
 
-export default router;
+export { router as usersRouter };

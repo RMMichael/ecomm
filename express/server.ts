@@ -3,7 +3,7 @@
 import * as fs from "node:fs";
 import * as https from "node:https";
 
-var app = require('./app');
+import app from './app';
 var debug = require('debug')('express:server');
 var http = require('http');
 
@@ -79,5 +79,3 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
-
-// import { getUsers } from "./pg/queries";
