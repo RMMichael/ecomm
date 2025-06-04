@@ -72,8 +72,9 @@ app.use(function(err: any, req: any, res: any, next: any) {
 
   console.error(err.stack);
   const errorJson = {
+    status: "error",
     error: {
-      message: err.message, // Provide the error message
+      message: "Sorry, we were unable to process your request. Please try again later.",
       stack: process.env.NODE_ENV === 'development' ? err.stack : undefined, // Show stack trace only in development
     },
   };

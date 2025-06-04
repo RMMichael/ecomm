@@ -5,13 +5,6 @@ const router = Router();
 // TODO: admin auth
 router.get('/', async (req, res) => {
   const data = await SessionsController.getAll();
-  // if (error) {
-  //   res.json({
-  //     status: "error",
-  //     message: `Could not get sessions`
-  //   });
-  //   return;
-  // }
 
   res.json({
     status: "success",

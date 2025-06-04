@@ -8,6 +8,7 @@ export const pool = new Pool({
     port: 5432,
 })
 
+
 export const query = (text :any, params :any) => {
     return pool.query(text, params)
 }

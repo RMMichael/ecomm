@@ -90,12 +90,12 @@ function SortIcon({ direction }: any) {
     </span>
   );
 }
-
+// TODO: stop retries for specific errors
 const fetchData = async () => {
   const response = await fetch("http://localhost/api/v1/sessions");
   const json = await response.json();
   if (json.status === "error") {
-    throw new Error(json.message);
+    throw new Error(json.error?.message);
   }
   return json.data;
 };

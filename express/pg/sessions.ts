@@ -2,10 +2,8 @@ import {pool} from "./queries";
 import {Auth} from "../lib/Auth";
 
 export class SessionsController {
-  static getAll = async () => {
-    const sessionRows = await Auth.getAllSessions();
-
-    return sessionRows;
+  static getAll = () => {
+    return Auth.getAllSessions();
   }
 
   static deleteId = async (id: any) => {
