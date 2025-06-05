@@ -9,3 +9,5 @@
 .vercel/
 *.pem
 */initdb.sql
+**/generated/
+

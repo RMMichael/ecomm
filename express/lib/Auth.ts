@@ -2,6 +2,7 @@ import {query, pool} from '../pg/queries';
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
 import { User, Session} from "../schemas/DataObjects";
+import { prisma } from '../pg/queries';
 
 export const allowedOrigins = [process.env.FRONTEND_ORIGIN];
 
@@ -21,28 +22,32 @@ export class Auth {
             userId,
             expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
         };
-        await pool.query(
-            "INSERT INTO user_session (id, user_id, expires_at) VALUES ($1, $2, $3)",
-            [session.id,
-                session.userId,
-                session.expiresAt]
-        );
+        await prisma.$executeRaw`
+          INSERT INTO user_session (id, user_id, expires_at)
+          VALUES (${session.id}, ${session.userId}, ${session.expiresAt})
+        `;
         return session;
     }
 
     static async validateSessionToken(token: string): Promise<SessionValidationResult> {
         const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-        const result = await pool.query(
-            `SELECT s.id as session_id, s.user_id, s.expires_at, u.name
-            FROM user_session as s INNER JOIN users as u ON s.user_id = u.id
-            WHERE s.id = $1`,
-            [sessionId]
-        );
-        if (result.rows.length === 0) {
+        const result = await prisma.$queryRaw<Array<{
+            session_id: string;
+            user_id: string;
+            expires_at: Date;
+            name: string;
+        }>>`
+          SELECT s.id as session_id, s.user_id, s.expires_at, u.name
+          FROM user_session as s
+          INNER JOIN users as u ON s.user_id = u.id
+          WHERE s.id = ${sessionId}
+        `;
+
+        if (result.length === 0) {
             console.error(`no session found for token: ${token}`);
             return {session: null, user: null};
         }
-        const row = result.rows[0];
+        const row = result[0];
         console.log("row: ", JSON.stringify(row));
 
         const session: Session = {
@@ -58,28 +63,33 @@ export class Auth {
             picture: "",
         }
         if (Date.now() >= session.expiresAt.getTime()) {
-            await pool.query("DELETE FROM user_session WHERE id = $1", [session.id]);
+            await prisma.$executeRaw`
+              DELETE FROM user_session WHERE id = ${session.id}
+            `;
             return {session: null, user: null};
         }
         if (Date.now() >= session.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
             session.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
-            await pool.query(
-                "UPDATE user_session SET expires_at = $1 WHERE id = $2",
-                [session.expiresAt, session.id]
-            );
+            await prisma.$executeRaw`
+              UPDATE user_session SET expires_at = ${session.expiresAt} WHERE id = ${session.id}
+            `;
         }
         return {session, user};
     }
 
     static async invalidateSession(sessionId: string): Promise<boolean> {
-        const result = await pool.query("DELETE FROM user_session WHERE id = $1", [sessionId]);
+        const result = await prisma.$executeRaw`
+          DELETE FROM user_session WHERE id = ${sessionId}
+        `;
         console.log("invalidateSession result", result);
-        return (result.rowCount !== null) && (result.rowCount > 0);
+        return result === 1;
 
     }
 
     static async invalidateAllSessions(userId: number): Promise<void> {
-        await pool.query("DELETE FROM user_session WHERE user_id = $1", [userId]);
+        await prisma.$executeRaw`
+          DELETE FROM user_session WHERE user_id = ${userId}
+        `;
     }
 
     static async getUserSessions(userId: number): Promise<User[]> {
@@ -88,8 +98,36 @@ export class Auth {
     }
 
     static async getAllSessions() {
-        const result = await pool.query("SELECT * FROM user_session");
-        return result.rows;
+        // const result = await pool.query("SELECT *, user_session.id as session_id FROM user_session JOIN users ON user_session.user_id = users.id");
+        const result = await prisma.$queryRaw<
+            Array<{
+                session_id: string;
+                id: string;
+                user_id: string;
+                expires_at: Date;
+                google_id: string;
+                email: string;
+                name: string;
+                picture: string;
+            }>
+        >`
+          SELECT user_session.*, user_session.id as session_id, users.*
+          FROM user_session
+          JOIN users ON user_session.user_id = users.id
+        `;
+        //
+        // 	"0": {
+        // 		"id": 1,
+        // 		"user_id": 1,
+        // 		"expires_at": "2025-07-01T22:43:28.081Z",
+        // 		"google_id": "google_id_1",
+        // 		"email": "rickmikegull@email.com",
+        // 		"name": "rick",
+        // 		"picture": "picture_url",
+        // 		"session_id": "012345"
+        // 	}
+        // }
+        return result;
     }
 }
 type SessionValidationResult =

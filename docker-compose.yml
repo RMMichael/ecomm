@@ -28,7 +28,7 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      DB_URL: "postgresql://postgres:${POSTGRES_PASSWORD:?required}@db:54321/postgres?sslmode=disable"
+      DATABASE_URL: ${DATABASE_URL:?required}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
       NODE_ENV: ${NODE_ENV:-production}
       BACKEND_PORT: ${BACKEND_PORT}

@@ -6,6 +6,7 @@ import * as https from "node:https";
 import app from './app';
 var debug = require('debug')('express:server');
 var http = require('http');
+import { prisma } from './pg/queries';
 
 const options = {};
 
@@ -19,6 +20,33 @@ const server =  (process.env.HTTPSDEV === 'true') ? https.createServer(options, 
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+const shutdown = async (err: any) => {
+  if (err) {
+    console.error('Error caught:', err);
+  }
+  try {
+    await prisma.$disconnect();
+    await new Promise<void>((resolve, reject) => {
+      server.close((err: any) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+    console.log('Gracefully shut down.');
+    process.exit(err ? 1 : 0);
+  } catch (e) {
+    console.error('Error during shutdown:', e);
+    process.exit(1);
+  }
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+
+// Optional: handle uncaught exceptions/rejections
+process.on('uncaughtException', shutdown);
+process.on('unhandledRejection', shutdown);
 
 /**
  * Normalize a port into a number, string, or false.

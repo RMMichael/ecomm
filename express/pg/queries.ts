@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { PrismaClient } from '../generated/prisma';
 
 export const pool = new Pool({
     user: 'postgres',
@@ -8,6 +9,17 @@ export const pool = new Pool({
     port: 5432,
 })
 
+// be sure to disconnect prisma when the server stops
+// main()
+//   .then(async () => {
+//     await prisma.$disconnect()
+//   })
+//   .catch(async (e) => {
+//     console.error(e)
+//     await prisma.$disconnect()
+//     process.exit(1)
+//   })
+export const prisma = new PrismaClient();
 
 export const query = (text :any, params :any) => {
     return pool.query(text, params)
