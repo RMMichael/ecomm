@@ -3,6 +3,8 @@ import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/enco
 import { sha256 } from "@oslojs/crypto/sha2";
 import { User, Session} from "../schemas/DataObjects";
 import { prisma } from '../pg/queries';
+import * as PrismaClient from "../generated/prisma"
+import { Prisma } from '../generated/prisma';
 
 export const allowedOrigins = [process.env.FRONTEND_ORIGIN];
 
@@ -22,99 +24,74 @@ export class Auth {
             userId,
             expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
         };
-        await prisma.$executeRaw`
-          INSERT INTO user_session (id, user_id, expires_at)
-          VALUES (${session.id}, ${session.userId}, ${session.expiresAt})
-        `;
+        await prisma.$executeRawUnsafe(
+            `INSERT INTO sessions (id, user_id, expires_at) VALUES ($1, $2, $3)`,
+            session.id, session.userId, session.expiresAt
+        );
         return session;
     }
 
     static async validateSessionToken(token: string): Promise<SessionValidationResult> {
         const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-        const result = await prisma.$queryRaw<Array<{
-            session_id: string;
-            user_id: string;
-            expires_at: Date;
-            name: string;
-        }>>`
-          SELECT s.id as session_id, s.user_id, s.expires_at, u.name
-          FROM user_session as s
-          INNER JOIN users as u ON s.user_id = u.id
-          WHERE s.id = ${sessionId}
-        `;
+        // const result = await prisma.$queryRaw<Array<PrismaClient.Session & {name: string }>>`
+        //   SELECT s.id as session_id, s.user_id, s.expires_at, u.name
+        //   FROM sessions as s
+        //   INNER JOIN users as u ON s.user_id = u.id
+        //   WHERE s.id = ${sessionId}
+        // `;
+        const session = await prisma.session.findUnique({
+            where: { id: sessionId },
+            include: {
+                user: true,
+            }
+        });
 
-        if (result.length === 0) {
+        if (session === null) {
             console.error(`no session found for token: ${token}`);
             return {session: null, user: null};
         }
-        const row = result[0];
-        console.log("row: ", JSON.stringify(row));
 
-        const session: Session = {
-            id: row["session_id"],
-            userId: row["user_id"],
-            expiresAt: row["expires_at"],
-        };
-        const user: User = {
-            id: row["user_id"],
-            name: row["name"],
-            email: row["email"],
-            googleId: "",
-            picture: "",
-        }
         if (Date.now() >= session.expiresAt.getTime()) {
-            await prisma.$executeRaw`
-              DELETE FROM user_session WHERE id = ${session.id}
-            `;
+            await prisma.$executeRawUnsafe(
+                "DELETE FROM sessions WHERE id = $1", sessionId);
             return {session: null, user: null};
         }
         if (Date.now() >= session.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
             session.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
-            await prisma.$executeRaw`
-              UPDATE user_session SET expires_at = ${session.expiresAt} WHERE id = ${session.id}
-            `;
+            const sql = `UPDATE sessions SET expires_at = $1 WHERE id = $2`;
+            await prisma.$executeRawUnsafe(sql, session.expiresAt, session.id);
         }
-        return {session, user};
+        return {session, user: session.user};
     }
 
     static async invalidateSession(sessionId: string): Promise<boolean> {
-        const result = await prisma.$executeRaw`
-          DELETE FROM user_session WHERE id = ${sessionId}
-        `;
+        const result = await prisma.$executeRawUnsafe(
+            `DELETE FROM sessions WHERE id = $1`, sessionId);
         console.log("invalidateSession result", result);
         return result === 1;
 
     }
 
     static async invalidateAllSessions(userId: number): Promise<void> {
-        await prisma.$executeRaw`
-          DELETE FROM user_session WHERE user_id = ${userId}
-        `;
+        await prisma.$executeRawUnsafe("DELETE FROM sessions WHERE user_id = $1", userId);
     }
 
-    static async getUserSessions(userId: number): Promise<User[]> {
-        const result = await pool.query("SELECT FROM user_session WHERE user_id = $1", [userId]);
-        return result.rows;
+    static async getUserSessions(userId: number): Promise<Session[]> {
+        const result = await prisma.$queryRawUnsafe<PrismaClient.Session[]>(
+            "SELECT FROM sessions WHERE user_id = $1",
+            userId
+        );
+        return result;
     }
 
     static async getAllSessions() {
         // const result = await pool.query("SELECT *, user_session.id as session_id FROM user_session JOIN users ON user_session.user_id = users.id");
-        const result = await prisma.$queryRaw<
-            Array<{
-                session_id: string;
-                id: string;
-                user_id: string;
-                expires_at: Date;
-                google_id: string;
-                email: string;
-                name: string;
-                picture: string;
-            }>
-        >`
-          SELECT user_session.*, user_session.id as session_id, users.*
-          FROM user_session
-          JOIN users ON user_session.user_id = users.id
-        `;
+        const result = await prisma.$queryRawUnsafe<
+            Array<PrismaClient.Session & PrismaClient.User>
+        >(`
+          SELECT sessions.*, sessions.id as session_id, users.*
+          FROM sessions
+          JOIN users ON sessions.user_id = users.id`);
         //
         // 	"0": {
         // 		"id": 1,

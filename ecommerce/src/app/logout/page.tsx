@@ -54,7 +54,7 @@ const LogoutPage = () => {
   });
 
   // log out automatically when page is rendered
-  console.log("logout component render");
+  console.log("logout component render", { isSuccess, isPending, isError });
   useEffect(() => {
     console.log("useEffect logout", logout);
     logout();

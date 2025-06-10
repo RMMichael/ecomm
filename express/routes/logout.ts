@@ -3,16 +3,16 @@ import { Auth } from "../lib/Auth";
 
 const router = Router();
 router.post('/', async function(req: Request, res: Response, next: NextFunction) {
+  console.log("api hit /logout", req.session, req.user);
+
   if (!req.session) {
+    console.log("logout requested, but the current session was not found");
     res.json({
-      status: "error",
-      code: 404,
-      message: `Current user not found`,
+      status: "success",
+      message: "You are logged out.",
     });
     return;
   }
-
-  console.log("api hit /logout", req.session, req.user);
 
   const success = await Auth.invalidateSession(req.session.id);
   if (!success) {

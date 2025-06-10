@@ -6,7 +6,8 @@
     "start": "ts-node ./server.ts",
     "dev": "nodemon --watch . --ext ts --ignore '*.test.ts' --delay 3 --exec ts-node server.ts",
     "dev2": "tsup --watch --onSuccess \"node dist/index.cjs\"",
-    "build": "tsup"
+    "build": "tsup",
+    "db:seed": "tsx ./pg/seed.ts"
   },
   "dependencies": {
     "@oslojs/crypto": "^1.0.1",

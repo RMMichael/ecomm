@@ -18,9 +18,6 @@ services:
       - "54321:5432"
     volumes:
       - ./db_data:/var/lib/postgresql/data
-      #      - ./db/data:/var/lib/postgresql/data
-      # https://github.com/docker-library/docs/blob/master/postgres/README.md#initialization-scripts
-      - ./express/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
   api:
     build: ./express
     ports:
@@ -39,6 +36,5 @@ services:
     volumes:
       - ./express:/app
       - /app/node_modules
-      # keep node_modules within container
-      # https://docs.docker.com/compose/compose-file/compose-file-v3/#volumes-for-services-swarms-and-stack-files
+      # anonymous docker volume to keep node_modules within container
       # https://docs.docker.com/storage/volumes/#populate-a-volume-using-a-container

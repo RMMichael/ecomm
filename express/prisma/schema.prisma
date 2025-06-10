@@ -36,15 +36,17 @@ datasource db {
 
 model Session {
   id        String    @id
-  expiresAt DateTime  @db.Timestamptz(6)
+  expiresAt DateTime  @db.Timestamptz(6) @map("expires_at")
 
   user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  userId    Int
+  userId    Int       @map("user_id")
+
+  @@map("sessions")
 }
 
 model User {
   id        Int           @id @default(autoincrement())
-  googleId  String        @unique
+  googleId  String        @unique @map("google_id")
   email     String        @unique
   name      String
   picture   String
@@ -53,6 +55,7 @@ model User {
   sessions  Session[]
 
   @@index([googleId])
+  @@map("users")
 }
 
 enum Role {
